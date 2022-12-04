@@ -20,7 +20,6 @@ class ProductManager {
   
         if(Object.values(product).includes(undefined)){console.log("Completar todos los campos")}
         else{
-            this.#getProducts()
             if(!this.products.includes(product.id)){
                 this.products.push(product)
                 const productosAgregar = JSON.stringify(this.products)
@@ -34,13 +33,21 @@ class ProductManager {
 
 
     getProducts () {
-        this.#getProducts();
-        console.table(this.products)
+        if(fs.existsSync("productos.json")){
+            let file = fs.readFileSync("productos.json", "utf-8")
+            this.products = JSON.parse(file)
+            return(this.products)
+        }else{
+            fs.writeFileSync("productos.json","[]","utf-8");
+            let file = fs.readFileSync("productos.json", "utf-8")
+            this.products = JSON.parse(file)
+            
+            return(this.products)
+        }
     }
 
  
     getProductById (id) {
-        this.#getProducts();
         let findProduct = {}
         this.products.forEach((product)=>{
             if(product.code === id){
@@ -53,7 +60,6 @@ class ProductManager {
     }
 
     updateProduct(id,title, description, price, thumbnail, code, stock){
-        this.#getProducts();
         this.products.find((product) => {
             if(product.id === id){
                 product.title = title;
@@ -69,28 +75,12 @@ class ProductManager {
     }
 
     deleteProduct(ID){
-        this.#getProducts();
         const find = this.products.find(product => product.id === ID)
         if(find){
             const filtered = this.products.filter(product => product.id !== ID)
             const productosAgregar = JSON.stringify(filtered)
             fs.writeFileSync(this.path,productosAgregar,"utf-8")
         }else{console.error("Error: El producto no existe")}
-    }
-
-    #getProducts () {
-        if(fs.existsSync("productos.json")){
-            let file = fs.readFileSync("productos.json", "utf-8")
-            this.products = JSON.parse(file)
-            return(this.products)
-        }else{
-            fs.writeFileSync("productos.json","[]","utf-8");
-            let file = fs.readFileSync("productos.json", "utf-8")
-            this.products = JSON.parse(file)
-            
-            return(this.products)
-        }
-        
     }
 
     #getMaxId(){
