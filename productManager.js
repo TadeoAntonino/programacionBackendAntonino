@@ -1,37 +1,46 @@
+import fs from 'fs';
+
+
 class ProductManager {
     constructor() {
         this.products = [];
+        this.path = './productos.json';
       }
 
-    addProduct(title, description, price, thumbnail, stock){
+    addProduct(title, description, price, thumbnail, code, stock){
         const product ={
             title,
             description,
             price,
             thumbnail,
-            code: this.#getMaxCode() +1,
-            stock
+            id: this.#getMaxId() +1,
+            stock,
+            code
         }
   
         if(Object.values(product).includes(undefined)){console.log("Completar todos los campos")}
         else{
-            if(!this.products.includes(product.code)){
+            this.#getProducts()
+            if(!this.products.includes(product.id)){
                 this.products.push(product)
-            }else{
-                console.log("Ya existe este producto")
-            }
+                const productosAgregar = JSON.stringify(this.products)
+                fs.writeFileSync(this.path,productosAgregar,"utf-8")
+            }else{console.error("El ID no está disponible")}
+            
         }
-        console.log("Producto agregado con id: " + product.code)
+        console.log("Producto agregado con id: " + product.id)
     }
    
 
 
     getProducts () {
+        this.#getProducts();
         console.table(this.products)
     }
 
  
     getProductById (id) {
+        this.#getProducts();
         let findProduct = {}
         this.products.forEach((product)=>{
             if(product.code === id){
@@ -43,18 +52,60 @@ class ProductManager {
         } else return console.table(findProduct)
     }
 
-    #getMaxCode(){
-        let maxCode = 0;
-        this.products.map( (product) => {
-            if(product.code > maxCode) maxCode = product.code
+    updateProduct(id,title, description, price, thumbnail, code, stock){
+        this.#getProducts();
+        this.products.find((product) => {
+            if(product.id === id){
+                product.title = title;
+                product.description = description;
+                product.price = price;
+                product.thumbnail = thumbnail;
+                product.code = code;
+                product.stock = stock;
+            }
         })
-        return maxCode;
+        const productosAgregar = JSON.stringify(this.products)
+        fs.writeFileSync(this.path,productosAgregar,"utf-8")
+    }
+
+    deleteProduct(ID){
+        this.#getProducts();
+        const find = this.products.find(product => product.id === ID)
+        if(find){
+            const filtered = this.products.filter(product => product.id !== ID)
+            const productosAgregar = JSON.stringify(filtered)
+            fs.writeFileSync(this.path,productosAgregar,"utf-8")
+        }else{console.error("Error: El producto no existe")}
+    }
+
+    #getProducts () {
+        if(fs.existsSync("productos.json")){
+            let file = fs.readFileSync("productos.json", "utf-8")
+            this.products = JSON.parse(file)
+            return(this.products)
+        }else{
+            fs.writeFileSync("productos.json","[]","utf-8");
+            let file = fs.readFileSync("productos.json", "utf-8")
+            this.products = JSON.parse(file)
+            
+            return(this.products)
+        }
+        
+    }
+
+    #getMaxId(){
+        let maxId = 0;
+        this.products.map( (product) => {
+            if(product.id > maxId) maxId = product.id
+        })
+        return maxId;
     }
 }
 
 /* Creo un producto */
 const product = new ProductManager();
 
+/*
 function createProduct(){
     return new Promise(res=> {
         console.log("Creando productos... ")
@@ -99,7 +150,7 @@ async function global() {
 
 global();
 
-
+*/
 
 
 
