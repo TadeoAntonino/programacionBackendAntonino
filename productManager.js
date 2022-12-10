@@ -50,13 +50,16 @@ class ProductManager {
     getProductById (id) {
         let findProduct = {}
         this.products.forEach((product)=>{
-            if(product.code === id){
+            if(product.id === id){
                 findProduct = product
             }
         })
         if (!Object.keys(findProduct)) {
             return console.log("Not found")
-        } else return console.table(findProduct)
+        } else {
+            console.log(findProduct)
+            return findProduct;
+        }
     }
 
     updateProduct(id,title, description, price, thumbnail, code, stock){
@@ -143,7 +146,7 @@ global();
 */
 
 
-
+export default ProductManager;
 
 
 
